@@ -1,7 +1,7 @@
 version: "3"
 services:
     cups:
-        image: mietzen/docker-brother-cups
+        image: mietzen/docker-brother-cups:bullseye
         container_name: docker-brother-cups
         restart: unless-stopped
         ports:
