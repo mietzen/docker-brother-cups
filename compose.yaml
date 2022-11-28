@@ -1,0 +1,14 @@
+version: "3"
+services:
+    cups:
+        image: mietzen/docker-brother-cups
+        container_name: docker-brother-cups
+        restart: unless-stopped
+        ports:
+            - "631:631"
+        devices:
+            - /dev/bus/usb:/dev/bus/usb
+        environment:
+            - CUPSADMIN=batman
+            - CUPSPASSWORD=batcave_password
+            - TZ="Europe/Berlin"

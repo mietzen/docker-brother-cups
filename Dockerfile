@@ -8,16 +8,18 @@ ADD https://download.brother.com/welcome/dlf103532/hll2310dpdrv-4.0.0-1.i386.deb
 RUN dpkg --force-architecture -i /tmp/hll2310dpdrv-4.0.0-1.i386.deb \
 	&& rm -rf /tmp/hll2310dpdrv-4.0.0-1.i386.deb
 
-RUN /usr/sbin/cupsctl --remote-admin \
-	&& /usr/sbin/cupsctl --share-printers \
-	&& /usr/sbin/cupsctl --remote-any
-
-# This will use port 631
 EXPOSE 631
 
-# We want a mount for these
-VOLUME /config
+# Baked-in config file changes
+RUN sed -i 's/Listen localhost:631/Listen 0.0.0.0:631/' /etc/cups/cupsd.conf && \
+    sed -i 's/Browsing Off/Browsing On/' /etc/cups/cupsd.conf && \
+    sed -i 's/<Location \/>/<Location \/>\n  Allow All/' /etc/cups/cupsd.conf && \
+    sed -i 's/<Location \/admin>/<Location \/admin>\n  Allow All\n  Require user @SYSTEM/' /etc/cups/cupsd.conf && \
+    sed -i 's/<Location \/admin\/conf>/<Location \/admin\/conf>\n  Allow All/' /etc/cups/cupsd.conf && \
+    echo "ServerAlias *" >> /etc/cups/cupsd.conf && \
+    echo "DefaultEncryption Never" >> /etc/cups/cupsd.conf
 
-ADD run_cups.sh /run_cups.sh
-RUN chmod +x /run_cups.sh
-CMD ["/run_cups.sh"]
+ADD entrypoint.sh /
+RUN chmod +x /entrypoint.sh
+
+CMD ["/entrypoint.sh"]
